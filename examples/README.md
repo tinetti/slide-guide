@@ -10,16 +10,16 @@ First, export your telemetry data to CSV format:
 
 ```bash
 # Export single session
-dotnet run --project ../src/IbtTelemetry.Cli -- export ../sample.ibt telemetry_ml.csv
+dotnet run --project ../src/IbtTelemetry.Cli -- export ../sample.ibt telemetry_ml.parquet
 
 # Export multiple sessions (recommended for ML training)
-dotnet run --project ../src/IbtTelemetry.Cli -- export /path/to/telemetry_folder/ telemetry_ml.csv
+dotnet run --project ../src/IbtTelemetry.Cli -- export /path/to/telemetry_folder/ telemetry_ml.parquet
 ```
 
 ### 2. Install Python Dependencies
 
 ```bash
-pip install pandas numpy scikit-learn xgboost matplotlib
+pip install pandas numpy scikit-learn xgboost matplotlib pyarrow
 ```
 
 ### 3. Run Example

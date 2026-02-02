@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 namespace IbtTelemetry.Cli.Commands;
 
 /// <summary>
-/// Command to export telemetry data to CSV for machine learning
+/// Command to export telemetry data to Parquet for machine learning
 /// </summary>
 public class ExportCommand
 {
@@ -37,7 +37,7 @@ public class ExportCommand
     {
         try
         {
-            var exporter = new CsvExporter();
+            var exporter = new ParquetExporter();
 
             // Check if input is a file or directory
             if (File.Exists(inputPath))
@@ -105,7 +105,7 @@ public class ExportCommand
             }
             else
             {
-                Console.WriteLine($"Exported {CsvExporter.DefaultMlVariables.Length} default ML variables");
+                Console.WriteLine($"Exported {ParquetExporter.DefaultMlVariables.Length} default ML variables");
             }
 
             return 0;
@@ -147,7 +147,7 @@ public class ExportCommand
             }
 
             Console.WriteLine("\nDefault ML variables:");
-            foreach (var varName in CsvExporter.DefaultMlVariables)
+            foreach (var varName in ParquetExporter.DefaultMlVariables)
             {
                 Console.WriteLine($"  {varName}");
             }

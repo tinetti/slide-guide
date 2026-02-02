@@ -114,7 +114,7 @@ internal static class Program
 
     private static Command CreateExportCommand()
     {
-        var exportCommand = new Command("export", "Export telemetry data to CSV for machine learning");
+        var exportCommand = new Command("export", "Export telemetry data to Parquet for machine learning");
 
         // Define arguments and options
         var inputArgument = new Argument<string>(
@@ -123,7 +123,7 @@ internal static class Program
 
         var outputArgument = new Argument<string>(
             "output",
-            "Output CSV file path");
+            "Output Parquet file path");
 
         var allVariablesOption = new Option<bool>(
             aliases: new[] { "--all", "-a" },

@@ -143,22 +143,28 @@ dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt --samples --limit 5
 
 ### Machine Learning Export
 
-#### Export to CSV for ML Training
+####Export to Parquet for ML Training
 
 ```bash
-# Export with default ML variables (43 variables)
-dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.csv
+# Export with default ML variables (44 variables)
+dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.parquet
 
 # Export all variables (287 variables)
-dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.csv --all
+dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.parquet --all
 
 # Export specific variables
-dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.csv \
+dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.parquet \
   --variables Speed,RPM,Throttle,Brake,SteeringWheelAngle
 
 # Export entire directory of .ibt files
-dotnet run --project src/IbtTelemetry.Cli -- export ./telemetry_data/ combined.csv
+dotnet run --project src/IbtTelemetry.Cli -- export ./telemetry_data/ combined.parquet
 ```
+
+**Why Parquet?**
+- 📊 **Columnar storage**: 5-10x smaller files than CSV
+- ⚡ **Faster loading**: Native support in pandas, polars, arrow
+- 🎯 **Preserves types**: No string conversion, native floats/ints
+- 🔧 **Better for ML**: Optimized for analytical queries
 
 #### List Available Variables
 
@@ -166,7 +172,7 @@ dotnet run --project src/IbtTelemetry.Cli -- export ./telemetry_data/ combined.c
 dotnet run --project src/IbtTelemetry.Cli -- list-vars sample.ibt
 ```
 
-**Default ML Variables** (43 total):
+**Default ML Variables** (44 total):
 - Time & Position: SessionTime, Lap, LapDistPct, LapCurrentLapTime
 - Vehicle Dynamics: Speed, RPM, Gear
 - Driver Inputs: Throttle, Brake, Clutch, SteeringWheelAngle

@@ -9,7 +9,7 @@ This script demonstrates how to:
 4. Evaluate performance
 
 Requirements:
-    pip install pandas numpy scikit-learn xgboost matplotlib
+    pip install pandas numpy scikit-learn xgboost matplotlib pyarrow
 """
 
 import pandas as pd
@@ -21,10 +21,10 @@ from sklearn.metrics import mean_absolute_error, r2_score, mean_squared_error
 from xgboost import XGBRegressor
 
 
-def load_telemetry_data(csv_path):
-    """Load telemetry data from exported CSV"""
-    print(f"Loading data from {csv_path}...")
-    df = pd.read_csv(csv_path)
+def load_telemetry_data(parquet_path):
+    """Load telemetry data from exported Parquet"""
+    print(f"Loading data from {parquet_path}...")
+    df = pd.read_parquet(parquet_path)
     print(f"Loaded {len(df)} samples from {df['session_id'].nunique()} sessions")
     return df
 
@@ -209,8 +209,8 @@ def plot_predictions(y_true, y_pred):
 def main():
     """Main execution"""
     # Load data
-    csv_path = 'telemetry_ml.csv'  # Change to your exported CSV path
-    df = load_telemetry_data(csv_path)
+    parquet_path = 'telemetry_ml.parquet'  # Change to your exported Parquet path
+    df = load_telemetry_data(parquet_path)
 
     # Engineer features
     df = engineer_features(df)

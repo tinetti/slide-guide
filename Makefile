@@ -177,13 +177,13 @@ info:
 	@echo "  - Core:     $(CORE_PROJECT)"
 	@echo "  - Service:  $(SERVICE_PROJECT)"
 
-## export-ml: Export telemetry to CSV for machine learning
+## export-ml: Export telemetry to Parquet for machine learning
 export-ml:
-	dotnet run --project $(CLI_PROJECT) -- export $(SAMPLE_FILE) telemetry_ml.csv
+	dotnet run --project $(CLI_PROJECT) -- export $(SAMPLE_FILE) telemetry_ml.parquet
 
-## export-all-vars: Export all telemetry variables to CSV
+## export-all-vars: Export all telemetry variables to Parquet
 export-all-vars:
-	dotnet run --project $(CLI_PROJECT) -- export $(SAMPLE_FILE) telemetry_all.csv --all
+	dotnet run --project $(CLI_PROJECT) -- export $(SAMPLE_FILE) telemetry_all.parquet --all
 
 ## list-vars: List all available telemetry variables
 list-vars:
