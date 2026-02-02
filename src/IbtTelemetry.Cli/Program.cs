@@ -30,12 +30,12 @@ internal static class Program
 
     private static Command CreateReadCommand()
     {
-        var readCommand = new Command("read", "Read and display telemetry file information");
+        var readCommand = new Command("read", "Read and display telemetry file or directory");
 
         // Define arguments and options
-        var fileArgument = new Argument<FileInfo>(
-            "file",
-            "Path to the .ibt telemetry file")
+        var pathArgument = new Argument<string>(
+            "path",
+            "Path to .ibt file or directory containing .ibt files")
         {
             Arity = ArgumentArity.ExactlyOne
         };
@@ -52,13 +52,13 @@ internal static class Program
             aliases: new[] { "--json" },
             description: "Output in JSON format");
 
-        readCommand.AddArgument(fileArgument);
+        readCommand.AddArgument(pathArgument);
         readCommand.AddOption(samplesOption);
         readCommand.AddOption(limitOption);
         readCommand.AddOption(jsonOption);
 
         // Set handler
-        readCommand.SetHandler(async (FileInfo file, bool samples, int? limit, bool json) =>
+        readCommand.SetHandler(async (string path, bool samples, int? limit, bool json) =>
         {
             // Build host with DI
             var host = Host.CreateDefaultBuilder()
@@ -98,13 +98,13 @@ internal static class Program
             var readCommandInstance = new ReadCommand(telemetryService, formatters, logger);
 
             Environment.ExitCode = await readCommandInstance.ExecuteAsync(
-                file.FullName,
+                path,
                 samples,
                 limit,
                 json
             );
         },
-        fileArgument,
+        pathArgument,
         samplesOption,
         limitOption,
         jsonOption);

@@ -68,6 +68,15 @@ watch:
 run:
 	dotnet run --project $(CLI_PROJECT) -- read $(SAMPLE_FILE)
 
+## run-dir: Process all .ibt files in a directory
+run-dir:
+	@echo "Usage: make run-dir DIR=/path/to/telemetry"
+	@if [ -z "$(DIR)" ]; then \
+		echo "Error: DIR not specified"; \
+		exit 1; \
+	fi
+	dotnet run --project $(CLI_PROJECT) -- read $(DIR)
+
 ## run-all-samples: Run CLI with all samples
 run-all-samples:
 	dotnet run --project $(CLI_PROJECT) -- read $(SAMPLE_FILE) --samples

@@ -63,7 +63,11 @@ dotnet publish src/IbtTelemetry.Cli -c Release -r win-x64 --self-contained -o ./
 #### Display Session Information with First 5 Samples (Default)
 
 ```bash
+# Single file
 dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt
+
+# Process all .ibt files in directory (including subdirectories)
+dotnet run --project src/IbtTelemetry.Cli -- read ~/Documents/iRacing/telemetry/
 ```
 
 Output includes:
@@ -71,6 +75,8 @@ Output includes:
 - Session information (track, drivers, settings)
 - Variable summary by type
 - First 5 telemetry samples
+
+**Directory processing**: When given a directory path, automatically finds and processes all `.ibt` files recursively, showing a summary at the end.
 
 ```
 === Telemetry File Information ===
