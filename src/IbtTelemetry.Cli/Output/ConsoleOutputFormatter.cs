@@ -39,6 +39,24 @@ public class ConsoleOutputFormatter : IOutputFormatter
         }
 
         Console.WriteLine();
+
+        // Display variable summary
+        Console.WriteLine("=== Telemetry Variables ===");
+        Console.WriteLine();
+        Console.WriteLine($"Total Variables: {telemetry.VarHeaders.Count}");
+        Console.WriteLine();
+
+        // Group variables by type
+        var varsByType = telemetry.VarHeaders
+            .GroupBy(v => v.Type)
+            .OrderBy(g => g.Key);
+
+        foreach (var group in varsByType)
+        {
+            Console.WriteLine($"  {group.Key,-10} {group.Count(),3} variables");
+        }
+
+        Console.WriteLine();
     }
 
     public void DisplaySampleHeader()

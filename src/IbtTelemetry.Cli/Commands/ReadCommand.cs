@@ -53,19 +53,9 @@ public class ReadCommand
             // Display session info
             formatter.DisplaySessionInfo(telemetry);
 
-            // Display samples if requested
-            if (showSamples)
-            {
-                await DisplaySamplesAsync(telemetry, formatter, limit, cancellationToken);
-            }
-            else if (!jsonOutput)
-            {
-                // Close the JSON object if not showing samples
-                if (jsonOutput)
-                {
-                    Console.WriteLine("}");
-                }
-            }
+            // Always display samples - default to 5 if not specified
+            var sampleLimit = showSamples ? limit : (limit ?? 5);
+            await DisplaySamplesAsync(telemetry, formatter, sampleLimit, cancellationToken);
 
             return 0;
         }

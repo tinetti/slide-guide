@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using IbtTelemetry.Core.Models;
@@ -59,7 +60,36 @@ public class JsonOutputFormatter : IOutputFormatter
             Console.WriteLine($"    \"driverInfo\": {driverJson}");
         }
 
-        Console.WriteLine("  }");
+        Console.WriteLine("  },");
+
+        // Display variable headers
+        Console.WriteLine("  \"variables\": [");
+        var varHeaderList = telemetry.VarHeaders.Select((vh, idx) => new
+        {
+            index = idx,
+            name = vh.Name,
+            type = vh.Type.ToString(),
+            offset = vh.Offset,
+            count = vh.Count,
+            unit = vh.Unit,
+            description = vh.Description
+        }).ToList();
+
+        for (int i = 0; i < varHeaderList.Count; i++)
+        {
+            var vh = varHeaderList[i];
+            var json = JsonSerializer.Serialize(vh, _jsonOptions);
+            Console.Write($"    {json}");
+            if (i < varHeaderList.Count - 1)
+            {
+                Console.WriteLine(",");
+            }
+            else
+            {
+                Console.WriteLine();
+            }
+        }
+        Console.WriteLine("  ]");
     }
 
     public void DisplaySampleHeader()

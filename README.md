@@ -9,6 +9,7 @@ A modular, well-tested .NET 8.0 command-line utility and library for parsing iRa
 - **Modular Architecture**: Separate Core library, CLI tool, and Windows Service projects
 - **Well Tested**: Unit and integration tests with 80%+ code coverage
 - **Multiple Output Formats**: Console-friendly and JSON output modes
+- **Machine Learning Ready**: Export telemetry to CSV for ML training with default feature sets
 
 ## Project Structure
 
@@ -59,20 +60,25 @@ dotnet publish src/IbtTelemetry.Cli -c Release -r win-x64 --self-contained -o ./
 
 ### Command-Line Interface
 
-#### Display Session Information
+#### Display Session Information with First 5 Samples (Default)
 
 ```bash
 dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt
 ```
 
-Output:
+Output includes:
+- Telemetry file header information
+- Session information (track, drivers, settings)
+- Variable summary by type
+- First 5 telemetry samples
+
 ```
 === Telemetry File Information ===
 
 SDK Version:     2
 Tick Rate:       60 Hz
 Variables:       287
-Sample Buffers:  1
+Sample Buffers:  18000
 Buffer Size:     1464 bytes
 
 === Session Information ===
@@ -80,18 +86,41 @@ Buffer Size:     1464 bytes
 TrackName: sachsenring
 TrackID: 521
 ...
+
+=== Telemetry Variables ===
+
+Total Variables: 287
+  Bool        28 variables
+  Int         55 variables
+  BitField     3 variables
+  Float      196 variables
+  Double       5 variables
+
+=== Telemetry Samples ===
+
+--- Sample #1 ---
+  SessionTime                    30.617 s
+  Speed                          0.000 m/s
+  RPM                            300.000 revs/min
+  ...
 ```
 
-#### Display Telemetry Samples
+#### Display All Telemetry Samples
 
 ```bash
 dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt --samples
 ```
 
-#### Limit Sample Count
+#### Display Specific Number of Samples
 
 ```bash
-dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt --samples --limit 10
+dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt --limit 10
+```
+
+Or with all samples:
+
+```bash
+dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt --samples --limit 100
 ```
 
 #### JSON Output
@@ -105,6 +134,45 @@ dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt --json > output.jso
 ```bash
 dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt --samples --limit 5 --json
 ```
+
+### Machine Learning Export
+
+#### Export to CSV for ML Training
+
+```bash
+# Export with default ML variables (43 variables)
+dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.csv
+
+# Export all variables (287 variables)
+dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.csv --all
+
+# Export specific variables
+dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.csv \
+  --variables Speed,RPM,Throttle,Brake,SteeringWheelAngle
+
+# Export entire directory of .ibt files
+dotnet run --project src/IbtTelemetry.Cli -- export ./telemetry_data/ combined.csv
+```
+
+#### List Available Variables
+
+```bash
+dotnet run --project src/IbtTelemetry.Cli -- list-vars sample.ibt
+```
+
+**Default ML Variables** (43 total):
+- Time & Position: SessionTime, Lap, LapDistPct, LapCurrentLapTime
+- Vehicle Dynamics: Speed, RPM, Gear
+- Driver Inputs: Throttle, Brake, Clutch, SteeringWheelAngle
+- Accelerations: LatAccel, LongAccel, VertAccel
+- Orientation: YawNorth, Pitch, Roll
+- Tire Temperatures: LF/RF/LR/RR tempCL/CM/CR (12 variables)
+- Tire Wear: LF/RF/LR/RR wearL/M/R (6 variables)
+- Tire Pressure: LF/RF/LR/RR pressure (4 variables)
+- Fuel: FuelLevel, FuelLevelPct
+- Track: TrackTemp, TrackTempCrew
+
+See [ML_TELEMETRY_GUIDE.md](ML_TELEMETRY_GUIDE.md) for detailed ML training strategies and examples.
 
 ### Using as a Library
 
@@ -250,15 +318,56 @@ sc start "iRacing Telemetry Service"
 | Cross-Platform | Yes | Yes |
 | Windows Service | No | Yes (ready) |
 
+## Machine Learning Quick Start
+
+### 1. Export Telemetry Data
+
+```bash
+# Export single session with default ML variables
+dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.csv
+
+# Export multiple sessions
+dotnet run --project src/IbtTelemetry.Cli -- export ./telemetry_folder/ combined.csv
+```
+
+### 2. Train a Model
+
+```bash
+cd examples
+pip install pandas numpy scikit-learn xgboost matplotlib
+python ml_lap_time_prediction.py
+```
+
+### 3. Learn More
+
+- **[ML_TELEMETRY_GUIDE.md](ML_TELEMETRY_GUIDE.md)**: Comprehensive ML guide with strategies and architectures
+- **[examples/](examples/)**: Example scripts for lap time prediction, driver analysis, and more
+- **[IBT_FORMAT_SPECIFICATION.md](IBT_FORMAT_SPECIFICATION.md)**: Detailed file format documentation
+
+**ML Use Cases**:
+- **Oversteer control model** - Train ML to maintain optimal slip angle balance
+- Lap time prediction
+- Tire slip angle calculation
+- Optimal racing line (RL)
+- Tire wear modeling
+- Incident prediction
+- Driver style classification
+- Setup optimization
+
+### Advanced Analysis
+
+**Tire Slip Angle Calculation**: The telemetry includes velocity vectors (VelocityX, VelocityY, VelocityZ) and yaw rate, allowing accurate calculation of tire slip angles for vehicle dynamics analysis and setup optimization. See [docs/SLIP_ANGLE_CALCULATION.md](docs/SLIP_ANGLE_CALCULATION.md) for details.
+
 ## Future Enhancements
 
+- [x] CSV export for machine learning
 - [ ] Complete Windows Service implementation (file watcher, processing pipeline)
 - [ ] REST API for telemetry access
 - [ ] Database persistence (Entity Framework Core)
 - [ ] Real-time streaming via SignalR
 - [ ] NuGet package publication
 - [ ] Performance benchmarking with BenchmarkDotNet
-- [ ] Additional output formats (CSV, Parquet)
+- [ ] Parquet export for large datasets
 
 ## Contributing
 
