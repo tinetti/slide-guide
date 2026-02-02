@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using IbtTelemetry.Core.Models;
 
 namespace IbtTelemetry.Cli.Output;
@@ -51,25 +52,47 @@ public class ConsoleOutputFormatter : IOutputFormatter
     {
         Console.WriteLine($"--- Sample #{sampleNumber} ---");
 
-        // Display a few key parameters
-        var speed = sample.GetParameter("Speed");
-        var rpm = sample.GetParameter("RPM");
-        var gear = sample.GetParameter("Gear");
-        var throttle = sample.GetParameter("Throttle");
-        var brake = sample.GetParameter("Brake");
+        // Get all parameters
+        var allParams = sample.ToJsonDictionary();
 
-        if (speed != null)
-            Console.WriteLine($"  Speed:    {speed.Value} {speed.Unit}");
-        if (rpm != null)
-            Console.WriteLine($"  RPM:      {rpm.Value} {rpm.Unit}");
-        if (gear != null)
-            Console.WriteLine($"  Gear:     {gear.Value}");
-        if (throttle != null)
-            Console.WriteLine($"  Throttle: {throttle.Value} {throttle.Unit}");
-        if (brake != null)
-            Console.WriteLine($"  Brake:    {brake.Value} {brake.Unit}");
+        // Display all parameters
+        foreach (var param in allParams)
+        {
+            var paramName = param.Key;
+            var paramData = param.Value;
+
+            if (paramData.TryGetValue("value", out var value) && value != null)
+            {
+                var unit = paramData.TryGetValue("unit", out var u) && u != null ? u.ToString() : "";
+                var formattedValue = FormatValue(value);
+
+                if (!string.IsNullOrWhiteSpace(unit))
+                {
+                    Console.WriteLine($"  {paramName,-30} {formattedValue} {unit}");
+                }
+                else
+                {
+                    Console.WriteLine($"  {paramName,-30} {formattedValue}");
+                }
+            }
+        }
 
         Console.WriteLine();
+    }
+
+    private string FormatValue(object value)
+    {
+        return value switch
+        {
+            float f => f.ToString("F3"),
+            double d => d.ToString("F3"),
+            float[] fa => "[" + string.Join(", ", fa.Select(x => x.ToString("F3"))) + "]",
+            double[] da => "[" + string.Join(", ", da.Select(x => x.ToString("F3"))) + "]",
+            int[] ia => "[" + string.Join(", ", ia) + "]",
+            uint[] ua => "[" + string.Join(", ", ua) + "]",
+            bool[] ba => "[" + string.Join(", ", ba) + "]",
+            _ => value.ToString() ?? ""
+        };
     }
 
     public void DisplaySampleFooter()
