@@ -93,3 +93,6 @@ publish/
 Thumbs.db
 ehthumbs.db
 Desktop.ini
+
+# Large test files
+*.ibt
