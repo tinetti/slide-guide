@@ -12,16 +12,70 @@ internal static class Program
 {
     static async Task<int> Main(string[] args)
     {
-        // Create the root command
-        var rootCommand = new RootCommand("iRacing Telemetry Parser - Read and analyze .ibt telemetry files");
+        // Create the root command - primary function is converting .ibt to Parquet
+        var rootCommand = new RootCommand("iRacing Telemetry Converter - Convert .ibt files to Parquet for ML");
 
-        // Create commands
+        // Add default arguments for convert operation
+        var inputArgument = new Argument<string>(
+            "input",
+            "Path to .ibt file or directory containing .ibt files");
+
+        var outputArgument = new Argument<string>(
+            "output",
+            "Output Parquet file path");
+
+        var allVariablesOption = new Option<bool>(
+            aliases: new[] { "--all", "-a" },
+            description: "Export all variables (not just default ML variables)");
+
+        var variablesOption = new Option<string[]>(
+            aliases: new[] { "--variables", "-v" },
+            description: "Comma-separated list of specific variables to export");
+
+        rootCommand.AddArgument(inputArgument);
+        rootCommand.AddArgument(outputArgument);
+        rootCommand.AddOption(allVariablesOption);
+        rootCommand.AddOption(variablesOption);
+
+        // Set default handler (convert/export)
+        rootCommand.SetHandler(async (string input, string output, bool all, string[] vars) =>
+        {
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureServices((context, services) =>
+                {
+                    services.AddSingleton<ITelemetryService, TelemetryService>();
+                    services.AddSingleton<ExportCommand>();
+                    services.AddLogging(builder =>
+                    {
+                        builder.SetMinimumLevel(LogLevel.Information);
+                        builder.AddSimpleConsole(options =>
+                        {
+                            options.IncludeScopes = false;
+                            options.TimestampFormat = "HH:mm:ss ";
+                        });
+                    });
+                })
+                .Build();
+
+            var exportCommandInstance = host.Services.GetRequiredService<ExportCommand>();
+
+            Environment.ExitCode = await exportCommandInstance.ExecuteAsync(
+                input,
+                output,
+                all,
+                vars?.Length > 0 ? vars : null
+            );
+        },
+        inputArgument,
+        outputArgument,
+        allVariablesOption,
+        variablesOption);
+
+        // Add optional subcommands for other functionality
         var readCommand = CreateReadCommand();
-        var exportCommand = CreateExportCommand();
         var listVarsCommand = CreateListVariablesCommand();
 
         rootCommand.AddCommand(readCommand);
-        rootCommand.AddCommand(exportCommand);
         rootCommand.AddCommand(listVarsCommand);
 
         // Parse and execute
@@ -30,7 +84,7 @@ internal static class Program
 
     private static Command CreateReadCommand()
     {
-        var readCommand = new Command("read", "Read and display telemetry file or directory");
+        var readCommand = new Command("read", "Inspect and display telemetry file contents (diagnostic)");
 
         // Define arguments and options
         var pathArgument = new Argument<string>(
@@ -112,68 +166,6 @@ internal static class Program
         return readCommand;
     }
 
-    private static Command CreateExportCommand()
-    {
-        var exportCommand = new Command("export", "Export telemetry data to Parquet for machine learning");
-
-        // Define arguments and options
-        var inputArgument = new Argument<string>(
-            "input",
-            "Path to .ibt file or directory containing .ibt files");
-
-        var outputArgument = new Argument<string>(
-            "output",
-            "Output Parquet file path");
-
-        var allVariablesOption = new Option<bool>(
-            aliases: new[] { "--all", "-a" },
-            description: "Export all variables (not just default ML variables)");
-
-        var variablesOption = new Option<string[]>(
-            aliases: new[] { "--variables", "-v" },
-            description: "Comma-separated list of specific variables to export");
-
-        exportCommand.AddArgument(inputArgument);
-        exportCommand.AddArgument(outputArgument);
-        exportCommand.AddOption(allVariablesOption);
-        exportCommand.AddOption(variablesOption);
-
-        // Set handler
-        exportCommand.SetHandler(async (string input, string output, bool all, string[] vars) =>
-        {
-            var host = Host.CreateDefaultBuilder()
-                .ConfigureServices((context, services) =>
-                {
-                    services.AddSingleton<ITelemetryService, TelemetryService>();
-                    services.AddSingleton<ExportCommand>();
-                    services.AddLogging(builder =>
-                    {
-                        builder.SetMinimumLevel(LogLevel.Information);
-                        builder.AddSimpleConsole(options =>
-                        {
-                            options.IncludeScopes = false;
-                            options.TimestampFormat = "HH:mm:ss ";
-                        });
-                    });
-                })
-                .Build();
-
-            var exportCommandInstance = host.Services.GetRequiredService<ExportCommand>();
-
-            Environment.ExitCode = await exportCommandInstance.ExecuteAsync(
-                input,
-                output,
-                all,
-                vars?.Length > 0 ? vars : null
-            );
-        },
-        inputArgument,
-        outputArgument,
-        allVariablesOption,
-        variablesOption);
-
-        return exportCommand;
-    }
 
     private static Command CreateListVariablesCommand()
     {

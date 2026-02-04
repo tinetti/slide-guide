@@ -64,8 +64,12 @@ coverage:
 watch:
 	dotnet watch test $(SOLUTION)
 
-## run: Run the CLI application with sample.ibt (shows first 5 samples by default)
+## run: Convert sample.ibt to Parquet (primary function)
 run:
+	dotnet run --project $(CLI_PROJECT) -- $(SAMPLE_FILE) telemetry.parquet
+
+## run-inspect: Inspect sample.ibt contents
+run-inspect:
 	dotnet run --project $(CLI_PROJECT) -- read $(SAMPLE_FILE)
 
 ## run-dir: Process all .ibt files in a directory
@@ -177,13 +181,13 @@ info:
 	@echo "  - Core:     $(CORE_PROJECT)"
 	@echo "  - Service:  $(SERVICE_PROJECT)"
 
-## export-ml: Export telemetry to Parquet for machine learning
-export-ml:
-	dotnet run --project $(CLI_PROJECT) -- export $(SAMPLE_FILE) telemetry_ml.parquet
+## convert: Convert telemetry to Parquet for machine learning
+convert:
+	dotnet run --project $(CLI_PROJECT) -- $(SAMPLE_FILE) telemetry_ml.parquet
 
-## export-all-vars: Export all telemetry variables to Parquet
-export-all-vars:
-	dotnet run --project $(CLI_PROJECT) -- export $(SAMPLE_FILE) telemetry_all.parquet --all
+## convert-all: Convert with all telemetry variables to Parquet
+convert-all:
+	dotnet run --project $(CLI_PROJECT) -- $(SAMPLE_FILE) telemetry_all.parquet --all
 
 ## list-vars: List all available telemetry variables
 list-vars:

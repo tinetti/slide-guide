@@ -60,13 +60,15 @@ dotnet publish src/IbtTelemetry.Cli -c Release -r win-x64 --self-contained -o ./
 
 ### Command-Line Interface
 
-#### Display Session Information with First 5 Samples (Default)
+#### Inspect Telemetry Files (Optional)
+
+For diagnostic purposes, use the `read` subcommand:
 
 ```bash
-# Single file
+# Inspect single file (shows first 5 samples)
 dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt
 
-# Process all .ibt files in directory (including subdirectories)
+# Inspect all files in directory
 dotnet run --project src/IbtTelemetry.Cli -- read ~/Documents/iRacing/telemetry/
 ```
 
@@ -141,24 +143,26 @@ dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt --json > output.jso
 dotnet run --project src/IbtTelemetry.Cli -- read sample.ibt --samples --limit 5 --json
 ```
 
-### Machine Learning Export
+### Convert .ibt to Parquet (Primary Function)
 
-####Export to Parquet for ML Training
+The CLI's main purpose is converting iRacing telemetry files to Parquet format:
 
 ```bash
-# Export with default ML variables (44 variables)
-dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.parquet
+# Convert single file (44 default ML variables)
+dotnet run --project src/IbtTelemetry.Cli -- sample.ibt telemetry.parquet
 
-# Export all variables (287 variables)
-dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.parquet --all
+# Convert with all variables (287 variables)
+dotnet run --project src/IbtTelemetry.Cli -- sample.ibt telemetry.parquet --all
 
-# Export specific variables
-dotnet run --project src/IbtTelemetry.Cli -- export sample.ibt telemetry.parquet \
+# Convert specific variables
+dotnet run --project src/IbtTelemetry.Cli -- sample.ibt telemetry.parquet \
   --variables Speed,RPM,Throttle,Brake,SteeringWheelAngle
 
-# Export entire directory of .ibt files
-dotnet run --project src/IbtTelemetry.Cli -- export ./telemetry_data/ combined.parquet
+# Convert entire directory
+dotnet run --project src/IbtTelemetry.Cli -- ./telemetry_data/ combined.parquet
 ```
+
+**Simple syntax**: `IbtTelemetry.Cli <input> <output>`
 
 **Why Parquet?**
 - 📊 **Columnar storage**: 5-10x smaller files than CSV
