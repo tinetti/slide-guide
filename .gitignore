@@ -94,5 +94,6 @@ Thumbs.db
 ehthumbs.db
 Desktop.ini
 
-# Large test files
+# Large test files and output files
 *.ibt
+*.parquet
