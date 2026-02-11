@@ -97,3 +97,4 @@ Desktop.ini
 # Large test files and output files
 *.ibt
 *.parquet
+.aider*
